@@ -1,6 +1,8 @@
 import Image from "next/image";
 import React from "react";
 import GDSCLogo from '../assets/GDSC ENST.svg';
+import { getAuth, createUserWithEmailAndPassword as CUWEAP , updateProfile} from 'firebase/auth';
+import { app } from './index';
 export default function SignUp() {
     // This is just for reloading the state
     const [count,setCount] = React.useState(0)
@@ -16,6 +18,20 @@ export default function SignUp() {
     const register = async () => {
         // insert here firebase code;
         console.log(credentials.get('email'),credentials.get('password'))
+        const auth = getAuth(app);  
+        CUWEAP(auth, credentials.get('email') as string, credentials.get('password') as string)
+            .then(userCredentials => {
+                const user = userCredentials.user;
+                updateProfile(user, {displayName: credentials.get('displayName') as string})
+                    .then(() => console.log('DisplayName updated: ', credentials.get('displayName')?.toString()))
+                    .catch(error => console.error(error.message.toString()));
+                console.log(user);
+        })
+            .catch(error => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorCode.toString(), errorMessage.toString());
+        });
     }
 
     return <div style={{
